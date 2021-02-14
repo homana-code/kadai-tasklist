@@ -1,9 +1,9 @@
 package controllers;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 
 import javax.persistence.EntityManager;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -25,7 +25,6 @@ public class NewServlet extends HttpServlet {
      */
     public NewServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
@@ -35,25 +34,14 @@ public class NewServlet extends HttpServlet {
         EntityManager em = DBUtil.createEntityManager();
         em.getTransaction().begin();
 
-        //Taskのインスタンスを生成
-        Task m = new Task();
+        //CSRF対策
+        request.setAttribute("_token", request.getSession().getId());
 
-        // mの各フィールドにデータを代入
-        String content = "hello";
-        m.setContent(content);
+        // おまじないとしてのインスタンスを生成
+        request.setAttribute("tasks", new Task());
 
-        Timestamp currentTime = new Timestamp(System.currentTimeMillis());     // 現在の日時を取得
-        m.setCreated_at(currentTime);
-        m.setUpdated_at(currentTime);
-
-        // データベースに保存
-        em.persist(m);
-        em.getTransaction().commit();
-
-        // 自動採番されたIDの値を表示
-        response.getWriter().append(Integer.valueOf(m.getId()).toString());
-
-        em.close();
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/tasks/new.jsp");
+        rd.forward(request, response);
     }
 
 }
